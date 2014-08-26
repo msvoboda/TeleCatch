@@ -10,11 +10,11 @@
     <string name="pref_title_display_name">Phone number</string>
     <string name="pref_default_display_name">+420777607978</string>
 
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string name="pref_title_sent_types">Send types</string>
     <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
+        <item>SMS</item>
+        <item>Email</item>
+        <item>Phone call</item>
     </string-array>
     <string-array name="pref_example_list_values">
         <item>1</item>
@@ -27,12 +27,15 @@
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
     <string-array name="pref_sync_frequency_titles">
+        <item>5 minutes</item>
+        <item>10 minutes</item>
         <item>15 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
         <item>3 hours</item>
         <item>6 hours</item>
-        <item>Never</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
     </string-array>
     <string-array name="pref_sync_frequency_values">
         <item>15</item>
@@ -44,14 +47,11 @@
     </string-array>
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
-
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">Notifications</string>
-
     <string name="pref_title_new_message_notifications">New message notifications</string>
-
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
-
     <string name="pref_title_vibrate">Vibrate</string>
 </resources>
+
