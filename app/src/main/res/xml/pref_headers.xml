@@ -6,12 +6,4 @@
         android:fragment="cz.svoboda.telecatch.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
-    <header
-        android:fragment="cz.svoboda.telecatch.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
-
-    <header
-        android:fragment="cz.svoboda.telecatch.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
-
 </preference-headers>

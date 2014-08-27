@@ -17,7 +17,7 @@ public class TeleActivity extends Activity {
 
     private TextView textViewDetectState;
     private Button buttonToggleDetect;
-    private Button buttonExit;
+   // private Button buttonExit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +34,7 @@ public class TeleActivity extends Activity {
             }
         });
 
+        /*
         buttonExit = (Button) findViewById(R.id.buttonExit);
         buttonExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,7 +42,7 @@ public class TeleActivity extends Activity {
                 setDetectEnabled(false);
                 TeleActivity.this.finish();
             }
-        });
+        });*/
     }
 
 
@@ -62,6 +63,11 @@ public class TeleActivity extends Activity {
             Intent i = new Intent(this, SettingsActivity.class);
             startActivityForResult(i, 1);
             return true;
+        }
+        else if (id == R.id.action_exit)
+        {
+            setDetectEnabled(false);
+            TeleActivity.this.finish();
         }
 
         return super.onOptionsItemSelected(item);

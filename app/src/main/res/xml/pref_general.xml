@@ -1,11 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:key="example_checkbox"
-        android:title="@string/pref_title_social_recommendations"
-        android:summary="@string/pref_description_social_recommendations"
-        android:defaultValue="true" />
-
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
@@ -27,6 +21,14 @@
         android:defaultValue="-1"
         android:entries="@array/pref_example_list_titles"
         android:entryValues="@array/pref_example_list_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <ListPreference
+        android:key="sync_frequency"
+        android:title="@string/pref_title_sync_frequency"
+        android:entries="@array/pref_sync_frequency_titles"
+        android:entryValues="@array/pref_sync_frequency_values"
+        android:defaultValue="180"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
