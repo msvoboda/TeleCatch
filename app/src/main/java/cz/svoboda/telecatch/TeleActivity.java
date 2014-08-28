@@ -2,22 +2,31 @@ package cz.svoboda.telecatch;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class TeleActivity extends Activity {
+
+public class TeleActivity extends Activity implements CallNotifyInterface {
 
     private boolean detectEnabled;
 
     private TextView textViewDetectState;
     private Button buttonToggleDetect;
    // private Button buttonExit;
+   ArrayList<CallItem> call_list;
+    Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +43,16 @@ public class TeleActivity extends Activity {
             }
         });
 
-        /*
-        buttonExit = (Button) findViewById(R.id.buttonExit);
-        buttonExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setDetectEnabled(false);
-                TeleActivity.this.finish();
-            }
-        });*/
+        CallHelper.setNotify(this);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String phone = preferences.getString("phone_text",null);
+
+        call_list = new ArrayList<CallItem>();
+        CallAdapter adapter = new CallAdapter(getApplicationContext(),call_list);
+        ListView lv = (ListView)findViewById(R.id.callList);
+        lv.setAdapter(adapter);
+        //call_list.add(new CallItem("nobody"));
     }
 
 
@@ -82,6 +92,7 @@ public class TeleActivity extends Activity {
             // start detect service
             startService(intent);
 
+
             buttonToggleDetect.setText("off");
             textViewDetectState.setText("Detecting");
             textViewDetectState.setTextColor(getResources().getColor(R.color.green));
@@ -94,5 +105,23 @@ public class TeleActivity extends Activity {
             textViewDetectState.setText("Not detecting");
             textViewDetectState.setTextColor(getResources().getColor(R.color.red));
         }
+    }
+
+    @Override
+    public void OnNotify(final CallItem call)
+    {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                {
+                    //call_list.add(new CallItem("nobody"));
+                    call_list.add(call);
+                    CallAdapter adapter = new CallAdapter(getApplicationContext(),call_list);
+                    ListView lv = (ListView)findViewById(R.id.callList);
+                    lv.setAdapter(adapter);
+                }
+            }
+        };
+        mHandler.post(runnable);
     }
 }

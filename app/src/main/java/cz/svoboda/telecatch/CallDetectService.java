@@ -10,6 +10,12 @@ public class CallDetectService extends Service {
     public CallDetectService() {
     }
 
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();
+    }
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		callHelper = new CallHelper(this);
