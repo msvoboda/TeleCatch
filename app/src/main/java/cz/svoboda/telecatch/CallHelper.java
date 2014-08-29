@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -33,7 +36,7 @@ public class CallHelper {
 		@Override
 		public void onCallStateChanged(int state, String incomingNumber) {
 			switch (state) {
-			case TelephonyManager.CALL_STATE_RINGING:
+            case TelephonyManager.CALL_STATE_RINGING:
 				// called when someone is ringing to this phone
 				if (list != null) {
                     CallItem ci = new CallItem(incomingNumber);
@@ -42,6 +45,17 @@ public class CallHelper {
                     if (_notify != null) {
                         _notify.OnNotify(ci);
                     }
+
+                    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
+                    Cursor idCursor = ctx.getContentResolver().query(uri, null, null, null, null);
+                    while (idCursor.moveToNext()) {
+                        String id = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts._ID));
+                        String key = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+                        String name = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                        ci.Name = name;
+                        System.out.print("search: " + id + " key: " + key + " name: " + name);
+                    }
+                    idCursor.close();
                     System.out.print("Call:"+incomingNumber);
                 }
 				Toast.makeText(ctx, 
@@ -76,6 +90,7 @@ public class CallHelper {
 	private OutgoingReceiver outgoingReceiver;
     private Timer timer;
     private String phone_notify;
+    private String phone_title;
     long last_time=-1;
     long interval=-1;
 
@@ -94,6 +109,7 @@ public class CallHelper {
         phone_notify = preferences.getString("phone_text",null);
         String interval_string = preferences.getString("sync_frequency", "60000");
         interval = Long.parseLong(interval_string);
+        phone_title = preferences.getString("pref_message_title", "60000");
 	}
 
     class MyTimerTask extends TimerTask {
@@ -101,11 +117,14 @@ public class CallHelper {
             long time = System.currentTimeMillis();
             if (time > last_time+interval) {
                 SmsManager sms = SmsManager.getDefault();
-                String msg ="Calls report:";
+                String msg =phone_title;
 
                 for(int i =0; i < list.size();i++) {
                     CallItem c = list.get(i);
-                    msg+=c.PhoneNumber+", ";
+                    if (i == 0)
+                        msg+=c.PhoneNumber;
+                    else
+                        msg+=", "+c.PhoneNumber;
                 }
 
                 if (list.size()>0) {

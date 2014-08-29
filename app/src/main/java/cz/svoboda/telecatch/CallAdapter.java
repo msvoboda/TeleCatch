@@ -28,7 +28,7 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
 
         // Lookup view for data population
         TextView tvName = (TextView) convertView.findViewById(R.id.tvName);
-        tvName.setText(call.DateTime.toString()+" - "+ call.PhoneNumber);
+        tvName.setText(call.DateTime.toString()+" - "+ call.PhoneNumber + " - " + call.Name);
         // Return the completed view to render on screen
         return convertView;
     }

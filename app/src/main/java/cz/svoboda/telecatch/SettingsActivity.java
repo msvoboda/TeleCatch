@@ -69,6 +69,8 @@ public class SettingsActivity extends PreferenceActivity {
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference("phone_text"));
         bindPreferenceSummaryToValue(findPreference("example_list"));
+        bindPreferenceSummaryToValue(findPreference("message_title"));
+        bindPreferenceSummaryToValue(findPreference("sync_frequency"));
         //bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
     }
 
@@ -178,6 +180,7 @@ public class SettingsActivity extends PreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference("message_title"));
         }
     }
 }
