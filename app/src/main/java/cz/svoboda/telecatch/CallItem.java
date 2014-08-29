@@ -13,4 +13,6 @@ public class CallItem {
     public String PhoneNumber;
     public Date DateTime;
     public String Name;
+    public String Message;
+    public String Type;
 }

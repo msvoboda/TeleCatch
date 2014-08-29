@@ -79,6 +79,13 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             setDetectEnabled(false);
             TeleActivity.this.finish();
         }
+        else if (id == R.id.action_clear)
+        {
+            call_list.clear();
+            CallAdapter adapter = new CallAdapter(getApplicationContext(),call_list);
+            ListView lv = (ListView)findViewById(R.id.callList);
+            lv.setAdapter(adapter);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -93,7 +100,7 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             startService(intent);
 
 
-            buttonToggleDetect.setText("off");
+            //buttonToggleDetect.setText("off");
             textViewDetectState.setText("Detecting");
             textViewDetectState.setTextColor(getResources().getColor(R.color.green));
         }
@@ -101,7 +108,7 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             // stop detect service
             stopService(intent);
 
-            buttonToggleDetect.setText("on");
+            //buttonToggleDetect.setText("on");
             textViewDetectState.setText("Not detecting");
             textViewDetectState.setTextColor(getResources().getColor(R.color.red));
         }

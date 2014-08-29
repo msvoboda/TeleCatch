@@ -7,10 +7,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
@@ -41,21 +43,28 @@ public class CallHelper {
 				if (list != null) {
                     CallItem ci = new CallItem(incomingNumber);
                     ci.DateTime = new Date(System.currentTimeMillis());
+                    ci.Type = "PHONE";
+
+                    try {
+                        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
+                        Cursor idCursor = ctx.getContentResolver().query(uri, null, null, null, null);
+                        while (idCursor.moveToNext()) {
+                            String id = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts._ID));
+                            String key = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+                            String name = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            ci.Name = name;
+                            System.out.print("search: " + id + " key: " + key + " name: " + name);
+                        }
+                        idCursor.close();
+                    }
+                    catch (Exception e) {
+
+                    }
+
                     list.add(ci);
                     if (_notify != null) {
                         _notify.OnNotify(ci);
                     }
-
-                    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
-                    Cursor idCursor = ctx.getContentResolver().query(uri, null, null, null, null);
-                    while (idCursor.moveToNext()) {
-                        String id = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts._ID));
-                        String key = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-                        String name = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                        ci.Name = name;
-                        System.out.print("search: " + id + " key: " + key + " name: " + name);
-                    }
-                    idCursor.close();
                     System.out.print("Call:"+incomingNumber);
                 }
 				Toast.makeText(ctx, 
@@ -86,8 +95,9 @@ public class CallHelper {
 	private Context ctx;
 	private TelephonyManager tm;
 	private CallStateListener callStateListener;
-	
 	private OutgoingReceiver outgoingReceiver;
+    private SmsReceiver smsReceiver;
+
     private Timer timer;
     private String phone_notify;
     private String phone_title;
@@ -99,6 +109,7 @@ public class CallHelper {
 		
 		callStateListener = new CallStateListener();
 		outgoingReceiver = new OutgoingReceiver();
+        smsReceiver = new SmsReceiver();
 
         MyTimerTask myTask = new MyTimerTask();
         timer = new Timer();
@@ -109,7 +120,7 @@ public class CallHelper {
         phone_notify = preferences.getString("phone_text",null);
         String interval_string = preferences.getString("sync_frequency", "60000");
         interval = Long.parseLong(interval_string);
-        phone_title = preferences.getString("pref_message_title", "60000");
+        phone_title = preferences.getString("message_title", "Call report:");
 	}
 
     class MyTimerTask extends TimerTask {
@@ -134,14 +145,45 @@ public class CallHelper {
                 list.clear();
                 last_time = System.currentTimeMillis();
             }
-            /*
-            CallItem ci = new CallItem("+420777607978");
-            ci.DateTime = new Date(System.currentTimeMillis());
-            if (_notify != null) {
-                _notify.OnNotify(ci);
-            }
-            list.add(ci);*/
+
             System.out.println("timer");
+        }
+    }
+
+    public class SmsReceiver extends BroadcastReceiver{
+
+        private SharedPreferences preferences;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
+                Bundle bundle = intent.getExtras();           //---get the SMS message passed in---
+                SmsMessage[] msgs = null;
+                String msg_from;
+                if (bundle != null){
+                    //---retrieve the SMS message received---
+                    try{
+                        Object[] pdus = (Object[]) bundle.get("pdus");
+                        msgs = new SmsMessage[pdus.length];
+                        for(int i=0; i<msgs.length; i++){
+                            msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
+                            msg_from = msgs[i].getOriginatingAddress();
+                            String msgBody = msgs[i].getMessageBody();
+                            CallItem ci = new CallItem(msg_from);
+                            ci.DateTime = new Date(System.currentTimeMillis());
+                            ci.Name = msg_from;
+                            ci.Message = msgBody;
+                            ci.Type = "SMS";
+                            list.add(ci);
+                            if (_notify != null) {
+                                _notify.OnNotify(ci);
+                            }
+                        }
+                    }catch(Exception e){
+//                            Log.d("Exception caught",e.getMessage());
+                    }
+                }
+            }
         }
     }
 
@@ -154,6 +196,12 @@ public class CallHelper {
 
 		IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
 		ctx.registerReceiver(outgoingReceiver, intentFilter);
+
+
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        ctx.registerReceiver(smsReceiver, mIntentFilter);
+
 	}
 	
 	/**
@@ -162,6 +210,8 @@ public class CallHelper {
 	public void stop() {
 		tm.listen(callStateListener, PhoneStateListener.LISTEN_NONE);
 		ctx.unregisterReceiver(outgoingReceiver);
+        ctx.unregisterReceiver(smsReceiver);
+        timer.cancel();
 	}
 
 }

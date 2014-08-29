@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -23,12 +24,23 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
         CallItem call = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_call, parent, false);
+            if (call.Type=="SMS")
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.sms_item, parent, false);
+            else
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_call, parent, false);
         }
+
 
         // Lookup view for data population
         TextView tvName = (TextView) convertView.findViewById(R.id.tvName);
-        tvName.setText(call.DateTime.toString()+" - "+ call.PhoneNumber + " - " + call.Name);
+        if (call.Type == "SMS")
+        {
+            TextView tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
+            tvMsg.setText(call.Message);
+        }
+
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd.MM. HH:mm");
+        tvName.setText(dt1.format(call.DateTime)+" - "+ call.PhoneNumber + " - " + call.Name);
         // Return the completed view to render on screen
         return convertView;
     }

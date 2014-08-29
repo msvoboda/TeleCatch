@@ -16,7 +16,9 @@
             android:id="@+id/buttonDetectToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="false" android:text="on"/>
+            android:checked="false" android:text="on"
+            android:textOff="OFF"
+            android:textOn="ON" />
         <TextView
             android:id="@+id/textViewDetectState"
             android:layout_width="fill_parent"

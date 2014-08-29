@@ -6,7 +6,7 @@
     <string name="pref_message_title">Calls report:</string>
 
     <string name="pref_title_display_name">Phone number</string>
-    <string name="pref_default_display_name">+420777607978</string>
+    <string name="pref_default_display_name">+420.........</string>
 
     <string name="pref_title_sent_types">Send types</string>
     <string-array name="pref_example_list_titles">
