@@ -26,10 +26,30 @@ public class CallHelper {
     ArrayList<CallItem> list = new ArrayList<CallItem>();
     static CallNotifyInterface _notify;
 
-    public static void setNotify(CallNotifyInterface notif)
-    {
+    public static void setNotify(CallNotifyInterface notif) {
         _notify = notif;
     }
+
+
+    private String GetContactName(String phone_number) {
+        String name = null;
+        try {
+            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
+            Cursor idCursor = ctx.getContentResolver().query(uri, null, null, null, null);
+            while (idCursor.moveToNext()) {
+                String id = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String key = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+                name = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                System.out.print("search: " + id + " key: " + key + " name: " + name);
+            }
+            idCursor.close();
+        }
+        catch (Exception e) {
+
+        }
+        return name;
+    }
+
 
     /**
 	 * Listener to detect incoming calls. 
@@ -44,23 +64,7 @@ public class CallHelper {
                     CallItem ci = new CallItem(incomingNumber);
                     ci.DateTime = new Date(System.currentTimeMillis());
                     ci.Type = "PHONE";
-
-                    try {
-                        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
-                        Cursor idCursor = ctx.getContentResolver().query(uri, null, null, null, null);
-                        while (idCursor.moveToNext()) {
-                            String id = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts._ID));
-                            String key = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-                            String name = idCursor.getString(idCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                            ci.Name = name;
-                            System.out.print("search: " + id + " key: " + key + " name: " + name);
-                        }
-                        idCursor.close();
-                    }
-                    catch (Exception e) {
-
-                    }
-
+                    ci.Name = GetContactName(incomingNumber);
                     list.add(ci);
                     if (_notify != null) {
                         _notify.OnNotify(ci);
@@ -152,9 +156,9 @@ public class CallHelper {
                 for(int i =0; i < list.size();i++) {
                     CallItem c = list.get(i);
                     if (i == 0)
-                        msg+=c.PhoneNumber;
+                        msg+=c.PhoneNumber + " ["+c.Name+"]";
                     else
-                        msg+=", "+c.PhoneNumber;
+                        msg+=", "+c.PhoneNumber+ " ["+c.Name+"]";
                 }
 
                 if (send_email==true && list.size()>0) {
@@ -212,7 +216,13 @@ public class CallHelper {
                             String msgBody = msgs[i].getMessageBody();
                             CallItem ci = new CallItem(msg_from);
                             ci.DateTime = new Date(System.currentTimeMillis());
-                            ci.Name = msg_from;
+                            String name = GetContactName(msg_from);
+                            ci.PhoneNumber = msg_from;
+                            if (name != null)
+                                ci.Name = name;
+                            else
+                                ci.Name = msg_from;
+
                             ci.Message = msgBody;
                             ci.Type = "SMS";
                             list.add(ci);

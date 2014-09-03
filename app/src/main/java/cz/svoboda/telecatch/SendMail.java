@@ -9,6 +9,7 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -28,9 +29,20 @@ public class SendMail {
 
     public void setMailServerProperties(String emailPort, String host, String user, String pass) {
         emailProperties = System.getProperties();
+
         emailProperties.put("mail.smtp.port", emailPort);
         emailProperties.put("mail.smtp.auth", "true");
         emailProperties.put("mail.smtp.starttls.enable", "true");
+        emailProperties.put("mail.smtp.user",user);
+        emailProperties.put("mail.smtp.password", pass);
+
+/*
+        emailProperties.put("mail.smtp.host", "smtp.gmail.com");
+        emailProperties.put("mail.smtp.socketFactory.port", emailPort);
+        emailProperties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        emailProperties.put("mail.smtp.auth", "true");
+        emailProperties.put("mail.smtp.starttls.enable", "true");
+        emailProperties.put("mail.smtp.port", emailPort);*/
 
         emailHost = host;
         fromUser = user;
@@ -38,7 +50,12 @@ public class SendMail {
     }
 
     public void createEmailMessage(String fromEmail, String[] toEmails, String emailSubject, String emailBody) throws AddressException, MessagingException {
-        mailSession = Session.getDefaultInstance(emailProperties, null);
+        mailSession = Session.getDefaultInstance(emailProperties, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromUser,fromUserEmailPassword);
+            }
+        });
+
         emailMessage = new MimeMessage(mailSession);
 
 

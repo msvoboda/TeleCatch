@@ -42,7 +42,7 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
         }
 
         SimpleDateFormat dt1 = new SimpleDateFormat("dd.MM. HH:mm");
-        tvName.setText(dt1.format(call.DateTime)+" - "+ call.PhoneNumber + " - " + call.Name);
+        tvName.setText(dt1.format(call.DateTime)+" - "+ call.PhoneNumber + " [" + call.Name+"]");
         // Return the completed view to render on screen
         return convertView;
     }

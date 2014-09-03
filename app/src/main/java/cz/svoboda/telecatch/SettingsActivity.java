@@ -74,7 +74,7 @@ public class SettingsActivity extends PreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("smtp_text"));
         bindPreferenceSummaryToValue(findPreference("user_text"));
         bindPreferenceSummaryToValue(findPreference("from_text"));
-        bindPreferenceSummaryToValue(findPreference("pass_text"));
+        //bindPreferenceSummaryToValue(findPreference("pass_text"));
         bindPreferenceSummaryToValue(findPreference("port_text"));
 
         bindPreferenceSummaryToValue(findPreference("message_title"));
