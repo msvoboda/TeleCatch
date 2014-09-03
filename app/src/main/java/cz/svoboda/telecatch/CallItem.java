@@ -8,6 +8,8 @@ import java.util.Date;
 public class CallItem {
     public CallItem(String phone) {
         PhoneNumber = phone;
+        Name = "";
+        Type = "";
     }
 
     public String PhoneNumber;

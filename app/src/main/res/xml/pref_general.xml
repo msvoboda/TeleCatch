@@ -1,16 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-    <EditTextPreference
-        android:key="phone_text"
-        android:title="@string/pref_title_display_name"
-        android:defaultValue="@string/pref_default_display_name"
-        android:selectAllOnFocus="true"
-        android:inputType="textCapWords"
-        android:capitalize="words"
-        android:singleLine="true"
-        android:maxLines="1" />
     <EditTextPreference
         android:key="message_title"
         android:title="@string/message_title"
@@ -20,18 +9,6 @@
         android:capitalize="words"
         android:singleLine="true"
         android:maxLines="1" />
-
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
-    <ListPreference
-        android:key="example_list"
-        android:title="@string/pref_title_sent_types"
-        android:defaultValue="-1"
-        android:entries="@array/pref_example_list_titles"
-        android:entryValues="@array/pref_example_list_values"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null" />
     <ListPreference
         android:key="sync_frequency"
         android:title="@string/pref_title_sync_frequency"
@@ -40,5 +17,71 @@
         android:defaultValue="60000"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
+    <SwitchPreference android:key="sms_enabled" android:title="Send notifications by SMS" android:defaultValue="true"></SwitchPreference>
+    <EditTextPreference
+        android:key="phone_text"
+        android:title="@string/pref_title_display_name"
+        android:defaultValue="@string/pref_default_display_name"
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <SwitchPreference android:key="email_enabled" android:title="Send notifications by EMAIL" android:defaultValue="false"></SwitchPreference>
+    <EditTextPreference
+        android:key="email_text"
+        android:title="EMAIL"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <EditTextPreference
+        android:key="smtp_text"
+        android:title="SMTP"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <EditTextPreference
+        android:key="from_text"
+        android:title="EMAIL Sender"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <EditTextPreference
+        android:key="user_text"
+        android:title="User"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <EditTextPreference
+        android:key="pass_text"
+        android:title="Password"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+    <EditTextPreference
+        android:key="port_text"
+        android:title="Port"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapWords"
+        android:capitalize="words"
+        android:singleLine="true"
+        android:maxLines="1" />
+
 
 </PreferenceScreen>

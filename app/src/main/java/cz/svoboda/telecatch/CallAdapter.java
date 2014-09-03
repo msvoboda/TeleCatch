@@ -26,6 +26,8 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
         if (convertView == null) {
             if (call.Type=="SMS")
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.sms_item, parent, false);
+            else if (call.Type == "ERR")
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.err_item, parent, false);
             else
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_call, parent, false);
         }
@@ -33,7 +35,7 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
 
         // Lookup view for data population
         TextView tvName = (TextView) convertView.findViewById(R.id.tvName);
-        if (call.Type == "SMS")
+        if (call.Type == "SMS" || call.Type == "ERR")
         {
             TextView tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
             tvMsg.setText(call.Message);

@@ -103,24 +103,43 @@ public class CallHelper {
     private String phone_title;
     long last_time=-1;
     long interval=-1;
+    boolean send_sms=true;
+    boolean send_email=true;
+    //
+    String mail_port;
+    String mail_host;
+    String mail_user;
+    String mail_pass;
+    String fromMail;
+    String toMail;
+
 
 	public CallHelper(Context ctx) {
 		this.ctx = ctx;
-		
+		///
 		callStateListener = new CallStateListener();
 		outgoingReceiver = new OutgoingReceiver();
         smsReceiver = new SmsReceiver();
-
+        ///
         MyTimerTask myTask = new MyTimerTask();
         timer = new Timer();
         timer.schedule(myTask,30000,30000);
         last_time = System.currentTimeMillis();
-
-       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        ///
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         phone_notify = preferences.getString("phone_text",null);
         String interval_string = preferences.getString("sync_frequency", "60000");
         interval = Long.parseLong(interval_string);
         phone_title = preferences.getString("message_title", "Call report:");
+        send_sms = preferences.getBoolean("sms_enabled", true);
+        send_email = preferences.getBoolean("email_enabled", true);
+        mail_port = preferences.getString("port_text","25");
+        mail_host = preferences.getString("smtp_text","");
+        mail_user = preferences.getString("user_text","");
+        mail_pass = preferences.getString("pass_text","");
+        fromMail = preferences.getString("from_text","");
+        toMail = preferences.getString("email_text","");
+        ///
 	}
 
     class MyTimerTask extends TimerTask {
@@ -138,7 +157,29 @@ public class CallHelper {
                         msg+=", "+c.PhoneNumber;
                 }
 
-                if (list.size()>0) {
+                if (send_email==true && list.size()>0) {
+                    try {
+                        SendMail sender = new SendMail();
+                        sender.setMailServerProperties(mail_port,mail_host,mail_user,mail_pass);
+                        sender.createEmailMessage(fromMail,new String[] {toMail},phone_title,msg);
+                        sender.sendEmail();
+                    }
+                    catch (Exception e)
+                    {
+                        CallItem ci = new CallItem("TeleCatch");
+                        ci.DateTime = new Date(System.currentTimeMillis());
+                        ci.Name = "ERROR MAIL";
+                        ci.Message = e.getMessage();
+                        ci.Type = "ERR";
+                        list.add(ci);
+                        if (_notify != null) {
+                            _notify.OnNotify(ci);
+                        }
+                        System.out.print(e.getMessage());
+                    }
+                }
+
+                if (send_sms == true && list.size()>0) {
                     sms.sendTextMessage(phone_notify, null, msg, null, null);
                 }
 
