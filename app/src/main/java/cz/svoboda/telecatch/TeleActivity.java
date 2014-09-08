@@ -45,6 +45,8 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
 
         CallHelper.setNotify(this);
 
+        setDetectEnabled(CallDetectService.getState());
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String phone = preferences.getString("phone_text",null);
 

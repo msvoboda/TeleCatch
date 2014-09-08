@@ -28,6 +28,8 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.sms_item, parent, false);
             else if (call.Type == "ERR")
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.err_item, parent, false);
+            else if (call.Type == "INFO")
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.info_item, parent, false);
             else
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_call, parent, false);
         }
@@ -35,14 +37,16 @@ public class CallAdapter extends ArrayAdapter<CallItem> {
 
         // Lookup view for data population
         TextView tvName = (TextView) convertView.findViewById(R.id.tvName);
-        if (call.Type == "SMS" || call.Type == "ERR")
+        if (call.Type == "SMS" || call.Type == "ERR" || call.Type == "INFO")
         {
             TextView tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
             tvMsg.setText(call.Message);
         }
 
-        SimpleDateFormat dt1 = new SimpleDateFormat("dd.MM. HH:mm");
-        tvName.setText(dt1.format(call.DateTime)+" - "+ call.PhoneNumber + " [" + call.Name+"]");
+        if (tvName != null) {
+            SimpleDateFormat dt1 = new SimpleDateFormat("dd.MM. HH:mm");
+            tvName.setText(dt1.format(call.DateTime) + " - " + call.PhoneNumber + " [" + call.Name + "]");
+        }
         // Return the completed view to render on screen
         return convertView;
     }
