@@ -1,5 +1,7 @@
 package cz.svoboda.telecatch;
 
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +26,8 @@ import java.util.TimerTask;
 public class CallHelper {
 
     ArrayList<CallItem> list = new ArrayList<CallItem>();
+    ArrayList<CallItem> phone = new ArrayList<CallItem>();
+    ArrayList<CallItem> sms = new ArrayList<CallItem>();
     static CallNotifyInterface _notify;
 
     public static void setNotify(CallNotifyInterface notif) {
@@ -65,6 +69,7 @@ public class CallHelper {
                         ci.Type = "PHONE";
                         ci.Name = GetContactName(incomingNumber);
                         list.add(ci);
+                        phone.add(ci);
                         if (_notify != null) {
                             _notify.OnNotify(ci);
                         }
@@ -100,6 +105,7 @@ public class CallHelper {
     private CallStateListener callStateListener;
     private OutgoingReceiver outgoingReceiver;
     private SmsReceiver smsReceiver;
+    BroadcastReceiver send_receiver;
 
     private Timer timer;
     private String phone_notify;
@@ -118,6 +124,7 @@ public class CallHelper {
     // internal
     static int instances = 0;
     static boolean state = false;
+    boolean error = false;
 
 
     public CallHelper(Context ctx) {
@@ -152,17 +159,36 @@ public class CallHelper {
         public void run() {
             long time = System.currentTimeMillis();
             if (time > last_time + interval) {
-                SmsManager sms = SmsManager.getDefault();
+                SmsManager sms_manager = SmsManager.getDefault();
 
                 String msg = phone_title;
 
-                for (int i = 0; i < list.size(); i++) {
-                    CallItem c = list.get(i);
+                for (int i = 0; i < phone.size(); i++) {
+                    CallItem c = phone.get(i);
                     if (i == 0)
                         msg += c.PhoneNumber + " [" + c.Name + "] - " + c.Message;
                     else
                         msg += ", " + c.PhoneNumber + " [" + c.Name + "] - " + c.Message;
                 }
+
+                String sms_msg = "";
+                for (int i = 0; i < sms.size(); i++) {
+                    CallItem c = sms.get(i);
+                    if (i == 0) {
+                        sms_msg += "SMS: "+ c.PhoneNumber + " [" + c.Name + "] - " + c.Message;
+                    }
+                    else
+                        sms_msg += ", " + c.PhoneNumber + " [" + c.Name + "] - " + c.Message;
+                }
+
+                String to_send = "";
+                String delimiter = "";
+                if (phone.size()>0&& sms.size()>0)
+                    delimiter = ";";
+
+                to_send = msg+delimiter;
+                if (sms.size() > 0)
+                    to_send+=sms_msg;
 
                 if (send_email == true && list.size() > 0)
                 {
@@ -170,7 +196,7 @@ public class CallHelper {
                     {
                         SendMail sender = new SendMail();
                         sender.setMailServerProperties(mail_port, mail_host, mail_user, mail_pass);
-                        sender.createEmailMessage(fromMail, new String[]{toMail}, phone_title, msg);
+                        sender.createEmailMessage(fromMail, new String[]{toMail}, phone_title, to_send);
                         sender.sendEmail();
                     }
                     catch (Exception e)
@@ -184,15 +210,94 @@ public class CallHelper {
                         if (_notify != null) {
                             _notify.OnNotify(ci);
                         }
+                        error = true;
                         System.out.print(e.getMessage());
                     }
                 }
 
-                if (send_sms == true && list.size() > 0) {
-                    sms.sendTextMessage(phone_notify, null, msg, null, null);
+                if (send_sms == true && list.size() > 0) try {
+                    String SENT = "SMS_SENT";
+                    PendingIntent sentPI = PendingIntent.getBroadcast(ctx, 0, new Intent(SENT), 0);
+                    //PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0,new Intent(DELIVERED), 0);
+                    //---when the SMS has been sent---
+                    if (send_receiver == null) {
+                        send_receiver = new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context arg0, Intent arg1) {
+                                switch (getResultCode()) {
+                                    case Activity.RESULT_OK:
+                                        Toast.makeText(ctx, "SMS was sent",
+                                                Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                                        CallItem ci = new CallItem("TeleCatch");
+                                        ci.DateTime = new Date(System.currentTimeMillis());
+                                        ci.Name = "ERROR SMS";
+                                        ci.Message = "SMS wasn't sent.";
+                                        ci.Type = "ERR";
+                                        if (_notify != null) {
+                                            _notify.OnNotify(ci);
+                                        }
+                                        error = true;
+                                        break;
+                                    case SmsManager.RESULT_ERROR_NO_SERVICE:
+                                        ci = new CallItem("TeleCatch");
+                                        ci.DateTime = new Date(System.currentTimeMillis());
+                                        ci.Name = "ERROR SMS";
+                                        ci.Message = "SMS wasn't sent. No Service";
+                                        ci.Type = "ERR";
+                                        if (_notify != null) {
+                                            _notify.OnNotify(ci);
+                                        }
+                                        error = true;
+                                        break;
+                                    case SmsManager.RESULT_ERROR_NULL_PDU:
+                                        ci = new CallItem("TeleCatch");
+                                        ci.DateTime = new Date(System.currentTimeMillis());
+                                        ci.Name = "ERROR SMS";
+                                        ci.Message = "SMS wasn't sent. Null PDU";
+                                        ci.Type = "ERR";
+                                        if (_notify != null) {
+                                            _notify.OnNotify(ci);
+                                        }
+                                        error = true;
+                                        break;
+                                    case SmsManager.RESULT_ERROR_RADIO_OFF:
+                                        ci = new CallItem("TeleCatch");
+                                        ci.DateTime = new Date(System.currentTimeMillis());
+                                        ci.Name = "ERROR SMS";
+                                        ci.Message = "SMS wasn't sent. Radio off";
+                                        ci.Type = "ERR";
+                                        if (_notify != null) {
+                                            _notify.OnNotify(ci);
+                                        }
+                                        error = true;
+                                        break;
+                                }
+                            }
+                        };
+                        ctx.registerReceiver(send_receiver, new IntentFilter(SENT));
+                    }
+                    sms_manager.sendTextMessage(phone_notify, null, to_send, sentPI, null);
+                } catch (Exception e) {
+                    CallItem ci = new CallItem("TeleCatch");
+                    ci.DateTime = new Date(System.currentTimeMillis());
+                    ci.Name = "ERROR SMS";
+                    ci.Message = e.getMessage();
+                    ci.Type = "ERR";
+                    list.add(ci);
+                    if (_notify != null) {
+                        _notify.OnNotify(ci);
+                    }
+                    error = true;
+                    System.out.print(e.getMessage());
                 }
 
-                list.clear();
+                if (error == false) {
+                    list.clear();
+                    phone.clear();
+                    sms.clear();
+                }
                 last_time = System.currentTimeMillis();
             }
 
@@ -231,6 +336,7 @@ public class CallHelper {
                             ci.Message = msgBody;
                             ci.Type = "SMS";
                             list.add(ci);
+                            sms.add(ci);
                             if (_notify != null) {
                                 _notify.OnNotify(ci);
                             }
@@ -242,6 +348,8 @@ public class CallHelper {
             }
         }
     }
+
+
 
     /**
      * Start calls detection.
@@ -290,6 +398,9 @@ public class CallHelper {
         telephone_manager.listen(callStateListener, PhoneStateListener.LISTEN_NONE);
         ctx.unregisterReceiver(outgoingReceiver);
         ctx.unregisterReceiver(smsReceiver);
+        if (send_receiver != null)
+            ctx.unregisterReceiver(send_receiver);
+
         timer.cancel();
 
         CallItem ci = new CallItem("");
@@ -313,3 +424,4 @@ public class CallHelper {
         return state;
     }
 }
+
