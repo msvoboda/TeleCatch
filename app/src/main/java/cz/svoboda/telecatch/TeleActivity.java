@@ -22,8 +22,9 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
 
     private boolean detectEnabled;
 
-    private TextView textViewDetectState;
-    private Button buttonToggleDetect;
+    //private TextView textViewDetectState;
+    MenuItem play;
+    //private Button buttonToggleDetect;
    // private Button buttonExit;
    ArrayList<CallItem> call_list;
     Handler mHandler = new Handler();
@@ -33,19 +34,19 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tele);
 
-        textViewDetectState = (TextView) findViewById(R.id.textViewDetectState);
 
+        /*
+        textViewDetectState = (TextView) findViewById(R.id.textViewDetectState);
         buttonToggleDetect = (ToggleButton) findViewById(R.id.buttonDetectToggle);
         buttonToggleDetect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setDetectEnabled(!detectEnabled);
             }
-        });
+        });*/
 
         CallHelper.setNotify(this);
 
-        setDetectEnabled(CallDetectService.getState());
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String phone = preferences.getString("phone_text",null);
@@ -62,6 +63,9 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.tele, menu);
+
+        play = (MenuItem)menu.findItem(R.id.action_start);
+        setDetectEnabled(CallDetectService.getState());
         return true;
     }
 
@@ -88,6 +92,10 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             ListView lv = (ListView)findViewById(R.id.callList);
             lv.setAdapter(adapter);
         }
+        else if (id == R.id.action_start)
+        {
+            setDetectEnabled(!detectEnabled);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -101,18 +109,19 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             // start detect service
             startService(intent);
 
-
             //buttonToggleDetect.setText("off");
-            textViewDetectState.setText("Detecting");
-            textViewDetectState.setTextColor(getResources().getColor(R.color.green));
+            //textViewDetectState.setText("Detecting");
+            play.setIcon(R.drawable.stop);
+            //textViewDetectState.setTextColor(getResources().getColor(R.color.green));
         }
         else {
             // stop detect service
             stopService(intent);
 
             //buttonToggleDetect.setText("on");
-            textViewDetectState.setText("Not detecting");
-            textViewDetectState.setTextColor(getResources().getColor(R.color.red));
+            //textViewDetectState.setText("Not detecting");
+            play.setIcon(R.drawable.play);
+            //textViewDetectState.setTextColor(getResources().getColor(R.color.red));
         }
     }
 
