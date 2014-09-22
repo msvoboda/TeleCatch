@@ -34,8 +34,7 @@
     <ListView
         android:id="@+id/callList"
     android:layout_width="wrap_content"
-    android:layout_height="fill_parent"
-    android:layout_below="@+id/linearHeader">
+    android:layout_height="fill_parent">
 
     </ListView>
 

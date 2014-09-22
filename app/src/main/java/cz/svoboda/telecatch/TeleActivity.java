@@ -1,8 +1,11 @@
 package cz.svoboda.telecatch;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -96,6 +99,10 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
         {
             setDetectEnabled(!detectEnabled);
         }
+        else if (id == R.id.action_about) {
+            showAbout();
+
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -141,5 +148,26 @@ public class TeleActivity extends Activity implements CallNotifyInterface {
             }
         };
         mHandler.post(runnable);
+    }
+
+    protected void showAbout() {
+        // Inflate the about message contents
+        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = getBaseContext().getPackageManager().getPackageInfo(getBaseContext().getPackageName(), 0);
+            TextView text = (TextView)messageView.findViewById(R.id.textVersion);
+            text.setText(pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.icon);
+        builder.setTitle(R.string.app_name);
+        builder.setView(messageView);
+        builder.create();
+        builder.show();
     }
 }
