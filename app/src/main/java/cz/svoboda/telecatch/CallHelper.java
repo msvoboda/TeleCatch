@@ -190,6 +190,7 @@ public class CallHelper {
                 if (sms.size() > 0)
                     to_send+=sms_msg;
 
+                error = false;
                 if (send_email == true && list.size() > 0)
                 {
                     try

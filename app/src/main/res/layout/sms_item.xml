@@ -11,12 +11,14 @@
         android:layout_height="wrap_content" android:src="@drawable/sms"/>
     <TextView
         android:id="@+id/tvName"
+        android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Name"  />
     </LinearLayout>
     <TextView
     android:id="@+id/tvMsg"
+    android:textColor="@color/black"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Msg"  />
